@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight01Icon, ArrowUpRight01Icon, UserShield01Icon, MedicalMaskIcon, FlashIcon, Clock05Icon, Location04Icon, Hospital01Icon, School01Icon, UserIcon, Restaurant01Icon, HeartCheckIcon, Home01Icon, Call02Icon, Mail01Icon, Clock01Icon, Facebook01Icon, NewTwitterIcon, InstagramIcon, Linkedin01Icon, SentIcon, CheckmarkCircle02Icon, WhatsappIcon } from 'hugeicons-react';
+import { ArrowRight01Icon, ArrowUpRight01Icon, UserShield01Icon, MedicalMaskIcon, FlashIcon, Clock05Icon, Location04Icon, Hospital01Icon, School01Icon, UserIcon, Restaurant01Icon, HeartCheckIcon, Home01Icon, Call02Icon, Mail01Icon, Clock01Icon, SentIcon, CheckmarkCircle02Icon, WhatsappIcon } from 'hugeicons-react';
 import ScrollProgress from '@/components/ScrollProgress';
 import Testimonials from '@/components/Testimonials';
 import WhyChooseUs from '@/components/WhyChooseUs';
@@ -39,7 +39,7 @@ export default function Home() {
 
     try {
       // Get hCaptcha token
-      const hcaptchaToken = (window as any).hcaptcha?.getResponse();
+      const hcaptchaToken = (window as unknown as { hcaptcha?: { getResponse: () => string; reset: () => void } }).hcaptcha?.getResponse();
 
       if (!hcaptchaToken) {
         alert('Please complete the captcha verification.');
@@ -55,7 +55,7 @@ export default function Home() {
         body: JSON.stringify({ ...form, hcaptchaToken }),
       });
 
-      const data = await response.json();
+      const data = await response.json() as { error?: string };
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to send email');
@@ -65,18 +65,21 @@ export default function Home() {
       setForm({ name: '', email: '', phone: '', message: '', requestType: 'schedule-appointment' });
 
       // Reset hCaptcha
-      if ((window as any).hcaptcha) {
-        (window as any).hcaptcha.reset();
+      const hcaptcha = (window as unknown as { hcaptcha?: { reset: () => void } }).hcaptcha;
+      if (hcaptcha) {
+        hcaptcha.reset();
       }
 
       setTimeout(() => setSubmitted(false), 5000);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error submitting form:', error);
-      alert(error.message || 'Failed to submit request. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit request. Please try again.';
+      alert(errorMessage);
 
       // Reset hCaptcha on error
-      if ((window as any).hcaptcha) {
-        (window as any).hcaptcha.reset();
+      const hcaptcha = (window as unknown as { hcaptcha?: { reset: () => void } }).hcaptcha;
+      if (hcaptcha) {
+        hcaptcha.reset();
       }
     } finally {
       setSubmitting(false);
