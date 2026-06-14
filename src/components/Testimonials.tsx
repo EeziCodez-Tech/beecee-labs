@@ -6,22 +6,34 @@ import { ArrowLeft01Icon, ArrowRight01Icon } from 'hugeicons-react';
 
 const testimonials = [
   {
-    name: 'Dr. Adebayo Okonkwo',
-    role: 'Chief Medical Officer, Lagoon Hospital',
-    content: 'BeeCee Medical has transformed our diagnostic capabilities. Their precision and turnaround time are unmatched in the industry.',
-    image: '/images/testimonial-1.jpg',
+    name: 'Fr. Justin Ifeanyi',
+    role: 'Client',
+    content: 'I had an excellent experience at BeeCee Medical Laboratory services. The staff were highly professional, courteous, and attentive throughout the entire process. From registration to sample collection, everything was handled efficiently and with great care.',
   },
   {
-    name: 'Mrs. Chioma Nwankwo',
-    role: 'HR Director, TechCorp Nigeria',
-    content: 'We\'ve partnered with BeeCee for all our pre-employment screenings. Their professionalism and comprehensive reports give us complete confidence.',
-    image: '/images/testimonial-2.jpg',
+    name: 'Adeyinka Tosin',
+    role: 'Client',
+    content: 'The Laboratory environment was clean, organized, and maintained high standards of hygiene, which gave me confidence in the quality of service provided. The medical personnel explained procedures clearly and ensured I was comfortable during my visit.',
   },
   {
-    name: 'Prof. Ibrahim Musa',
-    role: 'Dean, University of Lagos Medical School',
-    content: 'The accuracy and reliability of BeeCee\'s laboratory services make them our preferred partner for student health assessments.',
-    image: '/images/testimonial-3.jpg',
+    name: 'Mrs Bola Ayodele',
+    role: 'Client',
+    content: 'What impressed me most about BeeCee Medical Laboratory Services was the timely delivery of accurate test results and the commitment to patient care. I truly appreciate their dedication to excellence and would confidently recommend this laboratory centre to anyone seeking reliable and professional diagnostic services.',
+  },
+  {
+    name: 'Daniella',
+    role: 'Client',
+    content: 'The laboratory is very neat and maintains a high standard of hygiene and sanitation, which I\'ve been most impressed by. They deliver accurate results in a timely manner. I appreciate their attentiveness and dedication to patient care and would recommend this laboratory to anyone.',
+  },
+  {
+    name: 'Mrs Stella Olalekan',
+    role: 'Employer',
+    content: 'I recently brought my staff to BeeCee Medical Laboratory Services for Food Handlers, drivers and Nanny screening tests. I was highly impressed by the exceptional service we received. The laboratory environment was clean, organized, and maintained high standards of hygiene. I wholeheartedly recommend BeeCee Medical Laboratory Services to individuals and organizations seeking dependable diagnostic and employment screening services.',
+  },
+  {
+    name: 'Mls Alao Hakeem',
+    role: 'Medical Laboratory Scientist',
+    content: 'BeeCee Medical Laboratory services is owned by a professional and licensed medical laboratory scientist who has gathered wealth of experience from manual practice to full Automation. The owner is a lover of accurate, precise and timely service. She believes in quality healthcare services. As a colleague, I respect the laboratory judgment and I strongly recommend BeeCee Medical Laboratory for all your laboratory requests.',
   },
 ];
 

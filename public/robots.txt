@@ -1,0 +1,7 @@
+# robots.txt for BeeCee Medical Laboratory
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://beeceemedicallaboratory.com/sitemap.xml

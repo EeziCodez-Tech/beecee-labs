@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, Lato } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -31,6 +32,10 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={`${outfit.variable} ${lato.variable} bg-background text-on-background font-body-md antialiased mesh-gradient-bg min-h-screen`}>
         {children}
+        <Script
+          src="https://js.hcaptcha.com/1/api.js"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );

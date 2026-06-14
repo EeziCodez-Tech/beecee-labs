@@ -10,6 +10,9 @@
 
 # ai documentation
 /DESIGN.md
+/DEPLOYMENT.md
+/SECURITY.md
+/SECURITY_FIXES_SUMMARY.md
 
 # next.js
 /.next/

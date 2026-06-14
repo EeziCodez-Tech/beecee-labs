@@ -16,8 +16,8 @@ const features = [
   },
   {
     icon: SecurityCheckIcon,
-    title: 'Data Security',
-    description: 'HIPAA-compliant systems with end-to-end encryption protecting your sensitive health information.',
+    title: 'Confidentiality',
+    description: 'Strict confidentiality protocols ensuring your personal information is handled securely and used only for intended purposes.',
   },
   {
     icon: UserMultiple02Icon,
@@ -88,7 +88,7 @@ export default function WhyChooseUs() {
           Accredited &amp; Certified By
         </p>
         <div className="flex flex-wrap justify-center items-center gap-4 md:gap-6">
-          {['ISO 15189', 'MLSCN Certified', 'HIPAA Compliant', 'NHIS Approved'].map((cert, index) => (
+          {['MLSCN Certified', 'CAC Compliant'].map((cert, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, scale: 0.9 }}

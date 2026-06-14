@@ -19,15 +19,11 @@ const faqs = [
   },
   {
     question: 'How do you ensure patient data privacy?',
-    answer: 'We employ HIPAA-compliant systems with end-to-end encryption, secure data storage, and strict access controls. Only authorized personnel can access patient information, and all data handling follows international privacy regulations.',
+    answer: 'We take your privacy seriously. Contact information submitted through our appointment request form is handled with strict confidentiality and used solely for scheduling purposes. We do not store sensitive medical data online.',
   },
   {
     question: 'Do you offer corporate health screening packages?',
     answer: 'Absolutely. We provide customized corporate packages including pre-employment screenings, annual health checks, and onsite testing services. Contact our corporate partnerships team for tailored solutions.',
-  },
-  {
-    question: 'What payment methods do you accept?',
-    answer: 'We accept cash, bank transfers, credit/debit cards, and work with major HMOs and insurance providers. Corporate clients can also set up monthly billing arrangements.',
   },
 ];
 
@@ -103,20 +99,6 @@ export default function FAQ() {
         ))}
       </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-        className="mt-12 text-center"
-      >
-        <p className="font-body-md text-on-surface-variant mb-4">
-          Still have questions?
-        </p>
-        <button className="bg-primary hover:bg-primary-container text-on-primary font-body-md px-8 py-3 rounded-xl btn-magnetic">
-          Contact Our Support Team
-        </button>
-      </motion.div>
     </section>
   );
 }

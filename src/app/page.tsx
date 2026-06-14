@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight01Icon, ArrowUpRight01Icon, UserShield01Icon, MedicalMaskIcon, FlashIcon, Location04Icon, Hospital01Icon, School01Icon, UserIcon, Restaurant01Icon, HeartCheckIcon, Home01Icon, Call02Icon, Mail01Icon, Clock01Icon, Facebook01Icon, NewTwitterIcon, InstagramIcon, Linkedin01Icon, SentIcon, CheckmarkCircle02Icon } from 'hugeicons-react';
+import { ArrowRight01Icon, ArrowUpRight01Icon, UserShield01Icon, MedicalMaskIcon, FlashIcon, Clock05Icon, Location04Icon, Hospital01Icon, School01Icon, UserIcon, Restaurant01Icon, HeartCheckIcon, Home01Icon, Call02Icon, Mail01Icon, Clock01Icon, Facebook01Icon, NewTwitterIcon, InstagramIcon, Linkedin01Icon, SentIcon, CheckmarkCircle02Icon, WhatsappIcon } from 'hugeicons-react';
 import ScrollProgress from '@/components/ScrollProgress';
 import Testimonials from '@/components/Testimonials';
 import WhyChooseUs from '@/components/WhyChooseUs';
@@ -12,24 +12,98 @@ import FAQ from '@/components/FAQ';
 import Image from 'next/image';
 
 export default function Home() {
-  const [form, setForm] = useState({ name: '', email: '', phone: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '', requestType: 'schedule-appointment' });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const requestTypeOptions = [
+    { value: 'schedule-appointment', label: 'Schedule Lab Appointment' },
+    { value: 'partnership-inquiry', label: 'Discuss Partnership Options' },
+    { value: 'general-inquiry', label: 'General Inquiry' },
+    { value: 'test-results', label: 'Test Results Follow-up' },
+    { value: 'corporate-wellness', label: 'Corporate Wellness Program' },
+    { value: 'home-service', label: 'Home Collection Service' },
+  ];
+
+  const selectedOption = requestTypeOptions.find(opt => opt.value === form.requestType);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    // Simulate request submission. Replace with real API call/email service.
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setSubmitting(false);
-    setSubmitted(true);
-    setForm({ name: '', email: '', phone: '' });
-    setTimeout(() => setSubmitted(false), 5000);
+
+    try {
+      // Get hCaptcha token
+      const hcaptchaToken = (window as any).hcaptcha?.getResponse();
+
+      if (!hcaptchaToken) {
+        alert('Please complete the captcha verification.');
+        setSubmitting(false);
+        return;
+      }
+
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...form, hcaptchaToken }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send email');
+      }
+
+      setSubmitted(true);
+      setForm({ name: '', email: '', phone: '', message: '', requestType: 'schedule-appointment' });
+
+      // Reset hCaptcha
+      if ((window as any).hcaptcha) {
+        (window as any).hcaptcha.reset();
+      }
+
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch (error: any) {
+      console.error('Error submitting form:', error);
+      alert(error.message || 'Failed to submit request. Please try again.');
+
+      // Reset hCaptcha on error
+      if ((window as any).hcaptcha) {
+        (window as any).hcaptcha.reset();
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <>
       <ScrollProgress />
+
+      {/* WhatsApp Floating Button */}
+      <motion.a
+        href="https://wa.me/2348023584869"
+        target="_blank"
+        rel="noopener noreferrer"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5, delay: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#25D366] hover:bg-[#20BA5A] rounded-full shadow-[0_4px_20px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_30px_rgba(37,211,102,0.6)] flex items-center justify-center transition-all duration-300 group"
+      >
+        <WhatsappIcon size={28} className="text-white" />
+        <span className="absolute right-full mr-3 bg-on-surface text-surface px-3 py-2 rounded-lg text-sm font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg">
+          Chat with us
+        </span>
+      </motion.a>
 
       {/* TopNavBar */}
       <nav className="fixed top-0 w-full z-50 bg-surface/80 dark:bg-on-surface/80 backdrop-blur-xl border-b border-outline-variant/10 shadow-sm">
@@ -38,11 +112,11 @@ export default function Home() {
             <Image alt="BeeCee Medical Logo"
               className="w-auto"
               src="/images/beecee-header.png"
-              width={256}
-              height={256} />
+              width={150}
+              height={150} />
           </div>
 
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-8">
             <a
               className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1 active:scale-95 transition-transform"
               href="#hero"
@@ -79,7 +153,7 @@ export default function Home() {
             onClick={() => document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })}
             className="bg-primary hover:bg-primary-container text-on-primary font-body-md text-body-md px-6 py-2.5 rounded-full shadow-sm btn-magnetic flex items-center gap-2 cursor-pointer"
           >
-            Book Appointment
+            Book Now
             <ArrowRight01Icon size={18} />
           </button>
         </div>
@@ -115,8 +189,8 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="text-lg text-on-surface-variant leading-relaxed max-w-lg"
               >
-                Comprehensive diagnostic services with cutting-edge technology,
-                expert pathologists, and results you can trust.
+                Quality and precise medical laboratory services with qualified professionals,
+                relevant equipment, and accurate timely results you can trust.
               </motion.p>
 
               <motion.div
@@ -125,7 +199,10 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="flex flex-wrap gap-4 pt-4"
               >
-                <button className="bg-primary hover:bg-primary/90 text-on-primary text-base px-8 py-4 rounded-2xl shadow-[0_8px_30px_rgba(0,72,175,0.3)] hover:shadow-[0_12px_40px_rgba(0,72,175,0.4)] transition-all duration-300 flex items-center justify-center gap-2 font-semibold group">
+                <button
+                  onClick={() => document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="bg-primary hover:bg-primary/90 text-on-primary text-base px-8 py-4 rounded-2xl shadow-[0_8px_30px_rgba(0,72,175,0.3)] hover:shadow-[0_12px_40px_rgba(0,72,175,0.4)] transition-all duration-300 flex items-center justify-center gap-2 font-semibold group cursor-pointer"
+                >
                   Schedule Test
                   <ArrowRight01Icon size={20} className="group-hover:translate-x-1 transition-transform" />
                 </button>
@@ -146,16 +223,16 @@ export default function Home() {
                 className="grid grid-cols-3 gap-6 pt-8 border-t border-outline-variant/20"
               >
                 <div>
-                  <div className="text-3xl font-bold text-primary mb-1">15+</div>
-                  <div className="text-sm text-on-surface-variant">Years Experience</div>
+                  <div className="text-3xl font-bold text-primary mb-1">Quality</div>
+                  <div className="text-sm text-on-surface-variant">Accurate Results</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-primary mb-1">50+</div>
-                  <div className="text-sm text-on-surface-variant">Partner Clinics</div>
+                  <div className="text-3xl font-bold text-primary mb-1">100%</div>
+                  <div className="text-sm text-on-surface-variant">Licensed Professionals</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-primary mb-1">99.9%</div>
-                  <div className="text-sm text-on-surface-variant">Accuracy</div>
+                  <div className="text-3xl font-bold text-primary mb-1">Trusted</div>
+                  <div className="text-sm text-on-surface-variant">Patient Care</div>
                 </div>
               </motion.div>
             </div>
@@ -188,8 +265,8 @@ export default function Home() {
                   className="absolute -top-6 -left-6 bg-surface border border-outline-variant/20 rounded-2xl p-4 shadow-[0_12px_40px_rgba(0,0,0,0.1)] backdrop-blur-xl hidden lg:block"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <UserShield01Icon size={24} className="text-primary" />
+                    <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+                      <UserShield01Icon size={24} className="text-secondary" />
                     </div>
                     <div>
                       <div className="text-sm font-semibold text-on-surface">Certified Lab</div>
@@ -206,12 +283,12 @@ export default function Home() {
                   className="absolute -bottom-6 -right-6 bg-surface border border-outline-variant/20 rounded-2xl p-5 shadow-[0_12px_40px_rgba(0,0,0,0.1)] backdrop-blur-xl hidden lg:block"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-green-500/10 flex items-center justify-center">
-                      <FlashIcon size={28} className="text-green-600" />
+                    <div className="w-14 h-14 rounded-xl bg-secondary/10 flex items-center justify-center">
+                      <Clock05Icon size={28} className="text-secondary" />
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-on-surface">24/7</div>
-                      <div className="text-sm text-on-surface-variant">Available</div>
+                      <div className="text-xl font-bold text-on-surface">Timely Results</div>
+                      <div className="text-sm text-on-surface-variant">Fast Turnaround</div>
                     </div>
                   </div>
                 </motion.div>
@@ -221,7 +298,7 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6, delay: 0.9 }}
-                  className="absolute top-8 -right-4 bg-primary text-on-primary rounded-full px-5 py-3 shadow-[0_8px_30px_rgba(0,72,175,0.3)] hidden lg:flex items-center gap-2"
+                  className="absolute top-8 -right-4 bg-secondary text-on-primary rounded-full px-5 py-3 shadow-[0_8px_30px_rgba(0,72,175,0.3)] hidden lg:flex items-center gap-2"
                 >
                   <MedicalMaskIcon size={20} />
                   <span className="font-semibold text-sm">Modern Equipment</span>
@@ -344,12 +421,11 @@ export default function Home() {
               </div>
               <div>
                 <h4 className="font-headline-md text-2xl font-bold text-on-surface mb-3">
-                  Onsite Medical
+                  Onsite Medical Screening
                 </h4>
                 <p className="font-body-md text-base text-on-surface-variant leading-relaxed">
-                  Comprehensive corporate and community diagnostic programs
-                  deployed directly to your facility, minimizing operational
-                  downtime while ensuring total health compliance.
+                  Professional medical screening services delivered directly
+                  to your organization or facility for convenience and efficiency.
                 </p>
               </div>
             </motion.div>
@@ -369,12 +445,11 @@ export default function Home() {
               </div>
               <div>
                 <h4 className="font-headline-md text-2xl font-bold text-on-surface mb-3">
-                  Pre-admission
+                  Pre-admission Screening
                 </h4>
                 <p className="font-body-md text-base text-on-surface-variant leading-relaxed">
-                  Rigorous diagnostic testing and statutory health evaluations
-                  required for verified entry into domestic and international
-                  educational institutions.
+                  Comprehensive diagnostic testing and health evaluations
+                  required for admission into educational institutions.
                 </p>
               </div>
             </motion.div>
@@ -394,12 +469,11 @@ export default function Home() {
               </div>
               <div>
                 <h4 className="font-headline-md text-2xl font-bold text-on-surface mb-3">
-                  Pre-employment
+                  Pre-employment Screening
                 </h4>
                 <p className="font-body-md text-base text-on-surface-variant leading-relaxed">
-                  Tailored workforce fitness and medical capability standards
-                  mapping to help organizations onboard talent safely and verify
-                  baseline health metrics.
+                  Medical fitness evaluations to help organizations onboard
+                  employees safely and verify baseline health standards.
                 </p>
               </div>
             </motion.div>
@@ -419,12 +493,11 @@ export default function Home() {
               </div>
               <div>
                 <h4 className="font-headline-md text-2xl font-bold text-on-surface mb-3">
-                  Food Handlers
+                  Food Handlers Screening
                 </h4>
                 <p className="font-body-md text-base text-on-surface-variant leading-relaxed">
-                  Critical diagnostic hygiene, microbial, and infectious disease
-                  testing to enforce regulatory compliance for personnel in the
-                  food and hospitality sector.
+                  Essential health and hygiene testing to ensure regulatory
+                  compliance for personnel in the food and hospitality sector.
                 </p>
               </div>
             </motion.div>
@@ -450,12 +523,12 @@ export default function Home() {
               </div>
               <div className="z-10 relative">
                 <h4 className="font-headline-md text-2xl font-bold text-on-surface mb-3">
-                  Domestic &amp; Family Planning
+                  Pre-marital/Fertility &amp; Home Handlers
                 </h4>
                 <p className="font-body-md text-base text-on-surface-variant leading-relaxed max-w-3xl">
-                  Discreet and highly accurate diagnostic profiles for couples
-                  planning their future together, alongside essential health
-                  screenings for domestic staff to safeguard your household.
+                  Comprehensive screening for couples planning their future,
+                  alongside essential health evaluations for domestic staff and
+                  home handlers/maids to ensure household safety.
                 </p>
               </div>
             </motion.div>
@@ -497,25 +570,17 @@ export default function Home() {
                 for Service. A trial will convince you.
               </p>
               <div className="flex items-center gap-6">
-                <div className="flex -space-x-4">
-                  <div className="w-10 h-10 rounded-full bg-surface-container-high border-2 border-on-primary-fixed flex items-center justify-center font-label-sm text-xs text-primary font-bold">
-                    B2B
-                  </div>
-                  <div className="w-10 h-10 rounded-full bg-surface-container border-2 border-on-primary-fixed flex items-center justify-center font-label-sm text-xs text-primary font-bold">
-                    SLA
-                  </div>
-                  <div className="w-10 h-10 rounded-full bg-surface-container-low border-2 border-on-primary-fixed flex items-center justify-center font-label-sm text-xs text-primary font-bold">
-                    HMO
-                  </div>
-                </div>
                 <span className="font-label-sm text-label-sm text-surface-dim">
-                  Trusted by 50+ Clinics
+                  Fee for Service Available
                 </span>
               </div>
             </div>
 
             <div className="z-10 relative shrink-0">
-              <button className="bg-surface text-primary font-body-md text-body-md font-bold px-8 py-4 rounded-xl shadow-lg btn-magnetic whitespace-nowrap">
+              <button
+                onClick={() => document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })}
+                className="bg-surface text-primary font-body-md text-body-md font-bold px-8 py-4 rounded-xl shadow-lg btn-magnetic whitespace-nowrap cursor-pointer"
+              >
                 Discuss Options
               </button>
             </div>
@@ -533,7 +598,7 @@ export default function Home() {
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-secondary/10 rounded-full blur-[120px] pointer-events-none"></div>
 
         {/* Newsletter CTA Band */}
-        <div className="px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto pt-section-gap relative z-10" id="cta">
+        <div className="px-margin-mobile md:px-margin-desktop max-w-7xl mb-12 mx-auto pt-section-gap relative z-10" id="cta">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -541,16 +606,47 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="bg-gradient-to-br from-primary to-primary-container rounded-[2rem] p-8 md:p-12 relative overflow-hidden shadow-[0_20px_60px_rgba(0,72,175,0.3)]"
           >
+            {/* Decorative Elements */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/3 translate-x-1/3"></div>
             <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-10">
-              <div className="max-w-md text-center lg:text-left shrink-0">
-                <h3 className="font-headline-lg text-3xl md:text-4xl font-bold text-on-primary mb-3">
-                  Request a Lab Visit
-                </h3>
-                <p className="font-body-lg text-on-primary/80 leading-relaxed">
-                  Share your details and our team will reach out to schedule your
-                  appointment and send confirmation by email.
-                </p>
+              {/* Main Footer Content */}
+              <div className="flex flex-col gap-10">
+                {/* Brand Column */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2">
+                    <Image alt="BeeCee Medical Logo"
+                      className="w-auto"
+                      src="/images/beecee-footer.png"
+                      width={220}
+                      height={220} />
+                  </div>
+
+                  <p className="font-body-md text-on-primary/80 leading-relaxed max-w-md">
+                    Share your details and our team will reach out to schedule your appointment and send confirmation by email.
+                  </p>
+                </div>
+
+                {/* Contact Details */}
+                <div className="space-y-5">
+                  <a href="tel:+2348102918085" className="flex items-center gap-3 text-on-primary/90 hover:text-on-primary transition-colors group">
+                    <span className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors shrink-0">
+                      <Call02Icon size={18} className="text-on-primary" />
+                    </span>
+                    <span className="text-base font-medium">+234 810 291 8085</span>
+                  </a>
+                  <a href="mailto:beeceelaboratory@gmail.com" className="flex items-center gap-3 text-on-primary/90 hover:text-on-primary transition-colors group">
+                    <span className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors shrink-0">
+                      <Mail01Icon size={18} className="text-on-primary" />
+                    </span>
+                    <span className="text-base font-medium">beeceelaboratory@gmail.com</span>
+                  </a>
+                  <div className="flex items-center gap-3 text-on-primary/90">
+                    <span className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                      <Clock01Icon size={18} className="text-on-primary" />
+                    </span>
+                    <span className="text-base font-medium">Mon &ndash; Sat: 8:00 AM &ndash; 8:00 PM</span>
+                  </div>
+                </div>
               </div>
 
               <AnimatePresence mode="wait">
@@ -591,6 +687,65 @@ export default function Home() {
                         className="w-full bg-surface text-on-surface placeholder:text-on-surface-variant rounded-2xl pl-12 pr-4 py-4 outline-none focus:ring-2 focus:ring-white/50 transition-all"
                       />
                     </div>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                        className="w-full bg-surface text-on-surface rounded-2xl px-4 py-4 outline-none focus:ring-2 focus:ring-white/50 transition-all flex items-center justify-between cursor-pointer hover:bg-surface-container"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-sm">{selectedOption?.label}</span>
+                        </span>
+                        <motion.svg
+                          animate={{ rotate: dropdownOpen ? 180 : 0 }}
+                          transition={{ duration: 0.2 }}
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          className="text-on-surface-variant"
+                        >
+                          <path
+                            d="M5 7.5L10 12.5L15 7.5"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </motion.svg>
+                      </button>
+
+                      <AnimatePresence>
+                        {dropdownOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="absolute top-full left-0 right-0 mt-2 bg-surface rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] overflow-hidden z-50 border border-outline-variant/20"
+                          >
+                            {requestTypeOptions.map((option, index) => (
+                              <button
+                                key={option.value}
+                                type="button"
+                                onClick={() => {
+                                  setForm({ ...form, requestType: option.value });
+                                  setDropdownOpen(false);
+                                }}
+                                className={`w-full px-4 py-3 flex items-center gap-3 transition-all hover:bg-primary/10 ${form.requestType === option.value ? 'bg-primary/5' : ''
+                                  } ${index !== requestTypeOptions.length - 1 ? 'border-b border-outline-variant/10' : ''
+                                  }`}
+                              >
+                                <span className="text-sm text-on-surface font-medium">{option.label}</span>
+                                {form.requestType === option.value && (
+                                  <CheckmarkCircle02Icon size={18} className="ml-auto text-primary" />
+                                )}
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                     <div className="flex flex-col sm:flex-row gap-3">
                       <div className="relative flex-1">
                         <Mail01Icon size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant" />
@@ -615,6 +770,21 @@ export default function Home() {
                         />
                       </div>
                     </div>
+                    <div className="relative">
+                      <textarea
+                        required
+                        value={form.message}
+                        onChange={(e) => setForm({ ...form, message: e.target.value })}
+                        placeholder="Describe what you'd like to come in for (e.g., blood test, health screening, etc.)"
+                        rows={4}
+                        className="w-full bg-surface text-on-surface placeholder:text-on-surface-variant rounded-2xl px-4 py-4 outline-none focus:ring-2 focus:ring-white/50 transition-all resize-none"
+                      />
+                    </div>
+                    {isMounted && (
+                      <div className="flex justify-center">
+                        <div className="h-captcha" data-sitekey="0a24afb8-d294-4d62-a296-8124449c376c"></div>
+                      </div>
+                    )}
                     <button
                       type="submit"
                       disabled={submitting}
@@ -630,131 +800,9 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Main Footer Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto py-16 relative z-10"
-        >
-          <div className="grid grid-cols-2 md:grid-cols-12 gap-10">
-            {/* Brand Column */}
-            <div className="col-span-2 md:col-span-4 space-y-6">
-              <div className="flex items-center gap-2">
-                <Image alt="BeeCee Medical Logo"
-                  className="w-auto"
-                  src="/images/beecee-footer.png"
-                  width={256}
-                  height={256} />
-              </div>
-
-              <p className="font-body-md text-surface-variant leading-relaxed max-w-xs">
-                Clinical Excellence through Technology. Advancing diagnostics for
-                better community health.
-              </p>
-
-              {/* Contact Details */}
-              <div className="space-y-3">
-                <a href="tel:+2348102918085" className="flex items-center gap-3 text-surface-variant hover:text-primary-fixed-dim transition-colors group">
-                  <span className="w-9 h-9 rounded-xl bg-surface/10 flex items-center justify-center group-hover:bg-primary-fixed-dim/20 transition-colors">
-                    <Call02Icon size={16} className="text-primary-fixed-dim" />
-                  </span>
-                  <span className="text-sm">+234 810 291 8085</span>
-                </a>
-                <a href="mailto:info@beeceemedical.com" className="flex items-center gap-3 text-surface-variant hover:text-primary-fixed-dim transition-colors group">
-                  <span className="w-9 h-9 rounded-xl bg-surface/10 flex items-center justify-center group-hover:bg-primary-fixed-dim/20 transition-colors">
-                    <Mail01Icon size={16} className="text-primary-fixed-dim" />
-                  </span>
-                  <span className="text-sm">info@beeceemedical.com</span>
-                </a>
-                <div className="flex items-center gap-3 text-surface-variant">
-                  <span className="w-9 h-9 rounded-xl bg-surface/10 flex items-center justify-center">
-                    <Clock01Icon size={16} className="text-primary-fixed-dim" />
-                  </span>
-                  <span className="text-sm">Mon &ndash; Sat: 8:00 AM &ndash; 8:00 PM</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Operations */}
-            <div className="md:col-span-2 space-y-5">
-              <h4 className="font-label-sm text-sm text-surface uppercase tracking-wider font-semibold">
-                Operations
-              </h4>
-              <div className="flex flex-col gap-3">
-                {['Laboratory Network', 'Research & Development', 'Quality Assurance'].map((link) => (
-                  <a
-                    key={link}
-                    className="font-body-md text-surface-variant hover:text-primary-fixed-dim hover:translate-x-1 transition-all duration-300 inline-block w-fit"
-                    href="#"
-                  >
-                    {link}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Legal */}
-            <div className="md:col-span-2 space-y-5">
-              <h4 className="font-label-sm text-sm text-surface uppercase tracking-wider font-semibold">
-                Legal
-              </h4>
-              <div className="flex flex-col gap-3">
-                {['Privacy Protocol', 'Terms of Service', 'Compliance'].map((link) => (
-                  <a
-                    key={link}
-                    className="font-body-md text-surface-variant hover:text-primary-fixed-dim hover:translate-x-1 transition-all duration-300 inline-block w-fit"
-                    href="#"
-                  >
-                    {link}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Connect */}
-            <div className="md:col-span-4 space-y-5">
-              <h4 className="font-label-sm text-sm text-surface uppercase tracking-wider font-semibold">
-                Connect
-              </h4>
-              <div className="flex flex-col gap-3">
-                {['Investor Relations', 'Contact Support'].map((link) => (
-                  <a
-                    key={link}
-                    className="font-body-md text-surface-variant hover:text-primary-fixed-dim hover:translate-x-1 transition-all duration-300 inline-block w-fit"
-                    href="#"
-                  >
-                    {link}
-                  </a>
-                ))}
-              </div>
-
-              {/* Social Icons */}
-              <div className="flex items-center gap-3 pt-2">
-                {[
-                  { Icon: Facebook01Icon, label: 'Facebook' },
-                  { Icon: NewTwitterIcon, label: 'Twitter' },
-                  { Icon: InstagramIcon, label: 'Instagram' },
-                  { Icon: Linkedin01Icon, label: 'LinkedIn' },
-                ].map(({ Icon, label }) => (
-                  <a
-                    key={label}
-                    href="#"
-                    aria-label={label}
-                    className="w-10 h-10 rounded-xl bg-surface/10 flex items-center justify-center text-surface-variant hover:bg-primary hover:text-on-primary hover:-translate-y-1 transition-all duration-300"
-                  >
-                    <Icon size={18} />
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
         {/* Bottom Bar */}
         <div className="border-t border-surface-variant/10 relative z-10">
-          <div className="px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="px-margin-mobile md:px-margin-desktop max-w-9xl mx-auto py-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex flex-col sm:flex-row items-center gap-3">
               <p className="font-body-md text-sm text-surface-variant/60">
                 © 2026 BeeCee Medical Laboratory Services. All rights reserved.
