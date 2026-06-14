@@ -8,6 +8,9 @@
 # testing
 /coverage
 
+# ai documentation
+/DESIGN.md
+
 # next.js
 /.next/
 /out/
