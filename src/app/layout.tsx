@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, Lato } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import "./globals.css";
 
@@ -32,6 +33,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={`${outfit.variable} ${lato.variable} bg-background text-on-background font-body-md antialiased mesh-gradient-bg min-h-screen`}>
         {children}
+        <Analytics />
         <SpeedInsights />
       </body>
     </html>
