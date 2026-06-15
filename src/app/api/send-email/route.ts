@@ -178,7 +178,10 @@ export async function POST(request: NextRequest) {
     }
 
     const emailPayload = {
-      from: { address: 'noreply@beeceemedicallaboratory.com' },
+      from: { 
+        address: 'noreply@beeceemedicallaboratory.com',
+        name: 'BeeCee Medical Laboratory'
+      },
       to: [
         {
           email_address: {
@@ -356,7 +359,10 @@ export async function POST(request: NextRequest) {
 
     // Send auto-response email to user
     const autoResponsePayload = {
-      from: { address: 'noreply@beeceemedicallaboratory.com' },
+      from: { 
+        address: 'noreply@beeceemedicallaboratory.com',
+        name: 'BeeCee Medical Laboratory'
+      },
       to: [
         {
           email_address: {
