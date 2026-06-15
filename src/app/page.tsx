@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight01Icon, ArrowUpRight01Icon, UserShield01Icon, MedicalMaskIcon, FlashIcon, Clock05Icon, Location04Icon, Hospital01Icon, School01Icon, UserIcon, Restaurant01Icon, HeartCheckIcon, Home01Icon, Call02Icon, Mail01Icon, Clock01Icon, SentIcon, CheckmarkCircle02Icon, WhatsappIcon } from 'hugeicons-react';
 import ScrollProgress from '@/components/ScrollProgress';
@@ -16,6 +16,52 @@ export default function Home() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [typedHeading, setTypedHeading] = useState('');
+  const [typedSubheading, setTypedSubheading] = useState('');
+  const [typedDescription, setTypedDescription] = useState('');
+  const [headingComplete, setHeadingComplete] = useState(false);
+  const [subheadingComplete, setSubheadingComplete] = useState(false);
+  const [descriptionComplete, setDescriptionComplete] = useState(false);
+
+  const headingText = "Accurate Diagnostics. ";
+  const subheadingText = "Exceptional Care.";
+  const descriptionText = "Quality and precise medical laboratory services with qualified professionals, relevant equipment, and accurate timely results you can trust.";
+
+  // Typing effect for heading
+  useEffect(() => {
+    if (typedHeading.length < headingText.length) {
+      const timeout = setTimeout(() => {
+        setTypedHeading(headingText.slice(0, typedHeading.length + 1));
+      }, 80);
+      return () => clearTimeout(timeout);
+    } else {
+      setHeadingComplete(true);
+    }
+  }, [typedHeading]);
+
+  // Typing effect for subheading (starts after heading)
+  useEffect(() => {
+    if (headingComplete && typedSubheading.length < subheadingText.length) {
+      const timeout = setTimeout(() => {
+        setTypedSubheading(subheadingText.slice(0, typedSubheading.length + 1));
+      }, 80);
+      return () => clearTimeout(timeout);
+    } else if (typedSubheading.length === subheadingText.length) {
+      setSubheadingComplete(true);
+    }
+  }, [typedSubheading, headingComplete]);
+
+  // Typing effect for description (starts after subheading)
+  useEffect(() => {
+    if (subheadingComplete && typedDescription.length < descriptionText.length) {
+      const timeout = setTimeout(() => {
+        setTypedDescription(descriptionText.slice(0, typedDescription.length + 1));
+      }, 25);
+      return () => clearTimeout(timeout);
+    } else if (typedDescription.length === descriptionText.length) {
+      setDescriptionComplete(true);
+    }
+  }, [typedDescription, subheadingComplete]);
 
   const requestTypeOptions = [
     { value: 'schedule-appointment', label: 'Schedule Lab Appointment' },
@@ -91,10 +137,10 @@ export default function Home() {
 
       {/* TopNavBar */}
       <nav className="fixed top-0 w-full z-50 bg-surface/80 dark:bg-on-surface/80 backdrop-blur-xl border-b border-outline-variant/10 shadow-sm">
-        <div className="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 max-w-9xl mx-auto">
-          <div className="flex items-center gap-1">
+        <div className="flex justify-between items-center px-4 md:px-margin-desktop py-3 md:py-4 max-w-9xl mx-auto gap-2 md:gap-4">
+          <div className="flex items-center gap-1 flex-shrink-0">
             <Image alt="BeeCee Medical Logo"
-              className="w-auto"
+              className="w-auto h-10 md:h-12"
               src="/images/beecee-header.png"
               width={150}
               height={150} />
@@ -135,10 +181,11 @@ export default function Home() {
 
           <button
             onClick={() => document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-primary hover:bg-primary-container text-on-primary font-body-md text-body-md px-6 py-2.5 rounded-full shadow-sm btn-magnetic flex items-center gap-2 cursor-pointer"
+            className="bg-primary hover:bg-primary-container text-on-primary font-body-md text-sm md:text-body-md px-3 py-2 md:px-6 md:py-2.5 rounded-full shadow-sm btn-magnetic flex items-center gap-1 md:gap-2 cursor-pointer flex-shrink-0"
           >
-            Book Now
-            <ArrowRight01Icon size={18} />
+            <span className="hidden sm:inline">Book Now</span>
+            <span className="sm:hidden">Book Now</span>
+            <ArrowRight01Icon size={16} className="md:w-[18px] md:h-[18px]" />
           </button>
         </div>
       </nav>
@@ -159,22 +206,35 @@ export default function Home() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="font-headline-xl text-5xl md:text-6xl lg:text-7xl leading-[1.1] font-bold text-on-surface"
+                className="font-headline-xl text-5xl md:text-6xl lg:text-7xl leading-[1.1] font-bold text-on-surface min-h-[180px] md:min-h-[200px]"
               >
-                Accurate Diagnostics.{' '}
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary animate-gradient">
-                  Exceptional Care.
-                </span>
+                {typedHeading}
+                {!headingComplete && (
+                  <span className="inline-block w-[4px] h-12 md:h-16 bg-on-surface ml-1 animate-pulse align-middle"></span>
+                )}
+                {headingComplete && (
+                  <>
+                    <br />
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary animate-gradient">
+                      {typedSubheading}
+                      {!subheadingComplete && (
+                        <span className="inline-block w-[4px] h-12 md:h-16 bg-primary ml-1 animate-pulse align-middle"></span>
+                      )}
+                    </span>
+                  </>
+                )}
               </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                className="text-lg text-on-surface-variant leading-relaxed max-w-lg"
+                className="text-lg text-on-surface-variant leading-relaxed max-w-lg min-h-[80px]"
               >
-                Quality and precise medical laboratory services with qualified professionals,
-                relevant equipment, and accurate timely results you can trust.
+                {typedDescription}
+                {!descriptionComplete && (
+                  <span className="inline-block w-[3px] h-5 bg-primary ml-1 animate-pulse"></span>
+                )}
               </motion.p>
 
               <motion.div

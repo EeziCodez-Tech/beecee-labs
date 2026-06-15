@@ -79,7 +79,7 @@ export default function Testimonials() {
           </div>
 
           <div className="relative z-10 max-w-4xl mx-auto">
-            <p className="font-body-lg text-2xl md:text-2xl text-on-surface mb-8 leading-relaxed italic">
+            <p className="font-body-lg text-lg md:text-xl text-on-surface mb-8 leading-relaxed italic">
               &ldquo;{testimonials[currentIndex].content}&rdquo;
             </p>
 
