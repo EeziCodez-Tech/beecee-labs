@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight01Icon, ArrowUpRight01Icon, UserShield01Icon, MedicalMaskIcon, FlashIcon, Clock05Icon, Location04Icon, Hospital01Icon, School01Icon, UserIcon, Restaurant01Icon, HeartCheckIcon, Home01Icon, Call02Icon, Mail01Icon, Clock01Icon, SentIcon, CheckmarkCircle02Icon, WhatsappIcon } from 'hugeicons-react';
 import ScrollProgress from '@/components/ScrollProgress';
@@ -12,15 +12,10 @@ import FAQ from '@/components/FAQ';
 import Image from 'next/image';
 
 export default function Home() {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '', requestType: 'schedule-appointment' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '', requestType: 'schedule-appointment', honeypot: '' });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const requestTypeOptions = [
     { value: 'schedule-appointment', label: 'Schedule Lab Appointment' },
@@ -38,11 +33,9 @@ export default function Home() {
     setSubmitting(true);
 
     try {
-      // Get hCaptcha token
-      const hcaptchaToken = (window as unknown as { hcaptcha?: { getResponse: () => string; reset: () => void } }).hcaptcha?.getResponse();
-
-      if (!hcaptchaToken) {
-        alert('Please complete the captcha verification.');
+      // Check honeypot (should be empty)
+      if (form.honeypot) {
+        // Bot detected, silently fail
         setSubmitting(false);
         return;
       }
@@ -52,7 +45,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...form, hcaptchaToken }),
+        body: JSON.stringify(form),
       });
 
       const data = await response.json() as { error?: string };
@@ -62,25 +55,13 @@ export default function Home() {
       }
 
       setSubmitted(true);
-      setForm({ name: '', email: '', phone: '', message: '', requestType: 'schedule-appointment' });
-
-      // Reset hCaptcha
-      const hcaptcha = (window as unknown as { hcaptcha?: { reset: () => void } }).hcaptcha;
-      if (hcaptcha) {
-        hcaptcha.reset();
-      }
+      setForm({ name: '', email: '', phone: '', message: '', requestType: 'schedule-appointment', honeypot: '' });
 
       setTimeout(() => setSubmitted(false), 5000);
     } catch (error) {
       console.error('Error submitting form:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to submit request. Please try again.';
       alert(errorMessage);
-
-      // Reset hCaptcha on error
-      const hcaptcha = (window as unknown as { hcaptcha?: { reset: () => void } }).hcaptcha;
-      if (hcaptcha) {
-        hcaptcha.reset();
-      }
     } finally {
       setSubmitting(false);
     }
@@ -783,11 +764,16 @@ export default function Home() {
                         className="w-full bg-surface text-on-surface placeholder:text-on-surface-variant rounded-2xl px-4 py-4 outline-none focus:ring-2 focus:ring-white/50 transition-all resize-none"
                       />
                     </div>
-                    {isMounted && (
-                      <div className="flex justify-center">
-                        <div className="h-captcha" data-sitekey="0a24afb8-d294-4d62-a296-8124449c376c"></div>
-                      </div>
-                    )}
+                    {/* Honeypot field - hidden from users, bots will fill it */}
+                    <input
+                      type="text"
+                      name="website"
+                      value={form.honeypot}
+                      onChange={(e) => setForm({ ...form, honeypot: e.target.value })}
+                      className="absolute -left-[9999px]"
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
                     <button
                       type="submit"
                       disabled={submitting}

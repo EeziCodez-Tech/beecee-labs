@@ -44,37 +44,6 @@ function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
   return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - record.count };
 }
 
-// Verify hCaptcha token
-async function verifyHCaptcha(token: string, remoteip: string): Promise<boolean> {
-  const secret = process.env.HCAPTCHA_SECRET_KEY;
-  
-  if (!secret) {
-    console.error('HCAPTCHA_SECRET_KEY is not configured');
-    return false;
-  }
-
-  try {
-    const response = await fetch('https://api.hcaptcha.com/siteverify', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        secret,
-        response: token,
-        remoteip,
-        sitekey: '0a24afb8-d294-4d62-a296-8124449c376c',
-      }),
-    });
-
-    const data = await response.json();
-    return data.success === true;
-  } catch (error) {
-    console.error('hCaptcha verification error:', error);
-    return false;
-  }
-}
-
 const getRequestTypeLabel = (type: string): string => {
   const labels: Record<string, string> = {
     'schedule-appointment': 'Schedule Lab Appointment',
@@ -120,21 +89,20 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, email, phone, message, requestType, hcaptchaToken } = body;
+    const { name, email, phone, message, requestType, honeypot } = body;
 
     // Validate required fields
-    if (!name || !email || !phone || !message || !requestType || !hcaptchaToken) {
+    if (!name || !email || !phone || !message || !requestType) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    // Verify hCaptcha
-    const captchaValid = await verifyHCaptcha(hcaptchaToken, ip);
-    if (!captchaValid) {
+    // Honeypot check - if filled, it's a bot
+    if (honeypot) {
       return NextResponse.json(
-        { error: 'Captcha verification failed. Please try again.' },
+        { error: 'Invalid request' },
         { status: 400 }
       );
     }
@@ -291,12 +259,12 @@ export async function POST(request: NextRequest) {
                         <tr>
                           <td style="padding-right: 8px;">
                             <a href="mailto:${sanitizedEmail}" style="display: block; background: linear-gradient(135deg, #0048AF 0%, #0066FF 100%); color: #ffffff; text-decoration: none; padding: 16px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center; box-shadow: 0 4px 12px rgba(0, 72, 175, 0.3);">
-                              📧 Reply to Patient
+                              Reply to Patient
                             </a>
                           </td>
                           <td style="padding-left: 8px;">
                             <a href="tel:${sanitizedPhone}" style="display: block; background: #ffffff; color: #0048AF; text-decoration: none; padding: 16px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center; border: 2px solid #0048AF;">
-                              📞 Call Patient
+                              Call Patient
                             </a>
                           </td>
                         </tr>
