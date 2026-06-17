@@ -295,7 +295,7 @@ export default function Home() {
                   <Image
                     alt="Modern medical diagnostic laboratory"
                     className="w-full h-full object-cover object-center"
-                    src="/images/beecee-hero.png"
+                    src="/images/beecee-med-hero.png"
                     width={1400}
                     height={1000}
                   />

@@ -17,10 +17,26 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://beeceemedicallaboratory.com'),
   title: "BeeCee Medical Laboratory Services - Accurate Diagnostics",
   description: "To support excellence in patient care and safety by providing accurate and timely laboratory information and services to improve the health of individuals and communities.",
   icons: {
     icon: "/beecee-lab-favicon.ico",
+    shortcut: "/beecee-lab-favicon.ico",
+    apple: "/beecee-lab-favicon.ico",
+  },
+  openGraph: {
+    title: "BeeCee Medical Laboratory Services - Accurate Diagnostics",
+    description: "Professional medical screening services delivered directly to your organization or facility for convenience and efficiency.",
+    url: "https://beeceemedicallaboratory.com",
+    siteName: "BeeCee Medical Laboratory",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BeeCee Medical Laboratory Services - Accurate Diagnostics",
+    description: "Professional medical screening services delivered directly to your organization or facility for convenience and efficiency.",
   },
 };
 
